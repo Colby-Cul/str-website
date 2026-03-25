@@ -1,0 +1,60 @@
+<!-- Search Box Widget — Portable Search Bar -->
+<!-- Website ID: 486498 | Search page: all-properties -->
+<!-- NOTE: Colors are placeholder (default yellow #fac600). Designer to pick luxury palette. -->
+
+<style>
+  :root {
+    --ldg-psb-background: #ffffff;
+    --ldg-psb-border-radius: 0.42em;
+    --ldg-psb-box-shadow: 0px 24px 54px 0px rgba(0, 0, 0, 0.1);
+    --ldg-psb-padding: 14px;
+    --ldg-psb-input-background: #ffffff;
+    --ldg-psb-button-border-radius: 3.58em;
+    --ldg-psb-color-primary: #fac600;
+    --ldg-psb-color-primary-lighter:#fde380;
+    --ldg-psb-color-primary-darker: #7d6300;
+    --ldg-psb-color-primary-contrast: #333333;
+    --ldg-semantic-color-primary:  #fac600;
+    --ldg-semantic-color-primary-lighter: #fde380;
+    --ldg-semantic-color-primary-darker: #7d6300;
+    --ldg-semantic-color-primary-contrast: #333333;
+    --ldg-component-modal-z-index: 999;
+  }
+  #lodgify-search-bar {
+    width:100%;
+  }
+</style>
+<div
+  id="lodgify-search-bar"
+  data-website-id="486498"
+  data-language-code="en"
+  data-search-page-url='https://pinesidecabins.lodgify.com/en/5188979/all-properties'
+  
+  data-dates-check-in-label='Check-in'
+  data-dates-check-out-label='Check-out'
+  data-guests-counter-label='Guests'
+  data-guests-input-singular-label='{{NumberOfGuests}} guest'
+  data-guests-input-plural-label='{{NumberOfGuests}} guests'
+  data-location-input-label='Location'
+  data-search-button-label='Search'
+  data-dates-input-min-stay-tooltip-text='{"one":"Minimum {minStay} night","other":"Minimum {minStay} nights"}'
+  data-guests-breakdown-label='Guests'
+  data-adults-label='{"one":"adult","other":"adults"}'
+  data-adults-description='Ages {minAge} or above'
+  data-children-label='{"one":"child","other":"children"}'
+  data-children-description='Ages {minAge}-{maxAge}'
+  data-children-not-allowed-label='Not suitable for children'
+  data-infants-label='{"one":"infant","other":"infants"}'
+  data-infants-description='Under {maxAge}'
+  data-infants-not-allowed-label='Not suitable for infants'
+  data-pets-label='{"one":"pet","other":"pets"}'
+  data-pets-not-allowed-label='Not allowed'
+  data-done-label='Done'
+  
+  data-new-tab="false"
+  data-version="stable"
+  data-has-guests-breakdown
+  
+></div>
+
+<script src="https://app.lodgify.com/portable-search-bar/stable/renderPortableSearchBar.js" defer></script>
