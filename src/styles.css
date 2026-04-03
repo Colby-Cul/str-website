@@ -164,9 +164,126 @@ a {
   --ldg-bnb-font-family: var(--font-body);
 }
 
+.carousel-shell {
+  position: relative;
+}
+
+.carousel-image {
+  display: block;
+}
+
+.carousel-arrow {
+  position: absolute;
+  top: 50%;
+  z-index: 1;
+  display: inline-flex;
+  height: 3rem;
+  width: 3rem;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(18, 22, 26, 0.72);
+  color: #fff;
+  cursor: pointer;
+  font-size: 2rem;
+  line-height: 1;
+  transform: translateY(-50%);
+  transition:
+    background-color 180ms ease,
+    transform 180ms ease;
+}
+
+.carousel-arrow:hover {
+  background: rgba(18, 22, 26, 0.88);
+}
+
+.carousel-arrow:focus-visible,
+.carousel-dot:focus-visible,
+.carousel-thumbnail:focus-visible {
+  outline: 2px solid rgba(196, 168, 106, 0.9);
+  outline-offset: 2px;
+}
+
+.carousel-arrow-prev {
+  left: 1rem;
+}
+
+.carousel-arrow-next {
+  right: 1rem;
+}
+
+.carousel-dots {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.carousel-dot {
+  height: 0.72rem;
+  width: 0.72rem;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(85, 96, 104, 0.25);
+  cursor: pointer;
+  transition:
+    transform 180ms ease,
+    background-color 180ms ease;
+}
+
+.carousel-dot.is-active {
+  background: var(--color-bronze);
+  transform: scale(1.15);
+}
+
+.carousel-thumbnails {
+  display: grid;
+  flex: 1;
+  grid-template-columns: repeat(auto-fit, minmax(3.75rem, 1fr));
+  gap: 0.65rem;
+}
+
+.carousel-thumbnail {
+  overflow: hidden;
+  height: 4.5rem;
+  border: 2px solid transparent;
+  border-radius: 1rem;
+  background: var(--color-paper);
+  cursor: pointer;
+  opacity: 0.7;
+  padding: 0;
+  transition:
+    opacity 180ms ease,
+    border-color 180ms ease,
+    transform 180ms ease;
+}
+
+.carousel-thumbnail.is-active {
+  border-color: var(--color-bronze);
+  opacity: 1;
+  transform: translateY(-1px);
+}
+
 @media (max-width: 767px) {
   .button-primary,
   .button-secondary {
     width: 100%;
+  }
+
+  .carousel-arrow {
+    height: 2.75rem;
+    width: 2.75rem;
+  }
+
+  .carousel-arrow-prev {
+    left: 0.75rem;
+  }
+
+  .carousel-arrow-next {
+    right: 0.75rem;
+  }
+
+  .carousel-thumbnails {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
   }
 }

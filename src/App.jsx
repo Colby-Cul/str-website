@@ -13,6 +13,19 @@ const propertyPathMap = {
   '/properties/northstar-luxury-getaway': '746614',
 };
 
+const propertyMeta = {
+  '533203': {
+    bookingUrl: 'https://www.lodgify.com/book/533203',
+    mapQuery: '47 Shasta Trail, Graeagle, CA 96103',
+    mapHeading: '47 Shasta Trail, Graeagle, CA 96103',
+  },
+  '746614': {
+    bookingUrl: 'https://www.lodgify.com/book/746614',
+    mapQuery: '210 Bitter Brush Way, Placer County, CA 96161',
+    mapHeading: '210 Bitter Brush Way, Placer County, CA 96161',
+  },
+};
+
 function mergePropertyData(property) {
   const live = generatedData.properties?.[property.id];
   if (!live) {
@@ -51,6 +64,9 @@ function mergePropertyData(property) {
     availabilitySummary: live.availabilitySummary || property.availabilitySummary,
     liveAvailability: live.availability || null,
     heroImage: live.heroImage || null,
+    bookingUrl: propertyMeta[property.id]?.bookingUrl,
+    mapQuery: propertyMeta[property.id]?.mapQuery || live.address || property.address,
+    mapHeading: propertyMeta[property.id]?.mapHeading || property.address,
   };
 }
 
@@ -123,7 +139,12 @@ function SiteShell({ children, properties }) {
               </a>
             ))}
           </nav>
-          <a href={`#/properties/${properties[1].slug}`} className="button-secondary hidden md:inline-flex">
+          <a
+            href={properties[1].bookingUrl}
+            className="button-secondary hidden md:inline-flex"
+            target="_blank"
+            rel="noreferrer"
+          >
             Book Northstar
           </a>
         </div>
@@ -276,8 +297,8 @@ function PropertyCard({ property, detailed = false }) {
           <a href={`#/properties/${property.slug}`} className="button-primary">
             View property
           </a>
-          <a href="#/about" className="button-secondary">
-            Contact host
+          <a href={property.bookingUrl} className="button-secondary" target="_blank" rel="noreferrer">
+            Book direct
           </a>
         </div>
       </div>
@@ -306,6 +327,9 @@ function PropertyPage({ property }) {
             <h1 className="mt-5 font-heading text-5xl leading-none sm:text-6xl">{property.name}</h1>
             <p className="mt-5 max-w-2xl text-lg text-[var(--color-mist)]">{property.description}</p>
             <div className="mt-8 flex flex-wrap gap-3">
+              <a href={property.bookingUrl} className="button-primary" target="_blank" rel="noreferrer">
+                Book {property.shortLocation.includes('Graeagle') ? 'Graeagle' : 'Northstar'}
+              </a>
               <span className="pill">{property.rates.nightlyRange} / night</span>
               <span className="pill">{property.rating.toFixed(1)} stars</span>
               <span className="pill">{property.maxGuests} guests</span>
@@ -353,11 +377,20 @@ function PropertyPage({ property }) {
           </div>
           <div className="mt-10 rounded-[2rem] border border-dashed border-[var(--color-line)] bg-[linear-gradient(180deg,#f8f5ed,#f0ebdf)] p-7">
             <p className="eyebrow text-[var(--color-bronze)]">Map</p>
-            <p className="mt-3 font-heading text-3xl text-[var(--color-forest)]">{property.mapLabel}</p>
+            <p className="mt-3 font-heading text-3xl text-[var(--color-forest)]">{property.mapHeading}</p>
             <p className="mt-3 max-w-2xl text-[var(--color-slate)]">
-              Reserved for a production map embed or static map asset showing local orientation, landmark access, and nearby recreation.
+              Embedded Google Maps view for the property location.
             </p>
-            <div className="mt-6 h-64 rounded-[1.5rem] bg-[linear-gradient(135deg,rgba(48,65,61,0.18),rgba(196,168,106,0.18))]" />
+            <div className="mt-6 overflow-hidden rounded-[1.5rem] border border-[var(--color-line)] bg-white shadow-[0_18px_45px_rgba(17,22,28,0.06)]">
+              <iframe
+                title={`${property.name} map`}
+                src={buildGoogleMapsEmbed(property.mapQuery)}
+                className="h-80 w-full border-0"
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+                allowFullScreen
+              />
+            </div>
           </div>
         </div>
         <aside className="space-y-6">
@@ -386,6 +419,9 @@ function PropertyPage({ property }) {
             <p className="mt-3 text-sm text-[var(--color-slate)]">
               Live rates and availability are surfaced directly from Lodgify.
             </p>
+            <a href={property.bookingUrl} className="button-primary mt-5 w-full" target="_blank" rel="noreferrer">
+              Book {property.name}
+            </a>
             <div className="mt-5">
               <BookingWidget propertyId={property.id} />
             </div>
@@ -476,6 +512,135 @@ function SearchWidget() {
   );
 }
 
+function PhotoGallery({ property }) {
+  const gallery = property.gallery ?? [];
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [touchStartX, setTouchStartX] = useState(null);
+  const activeItem = gallery[activeIndex];
+
+  useEffect(() => {
+    setActiveIndex(0);
+  }, [property.id]);
+
+  if (!activeItem) {
+    return null;
+  }
+
+  const goToSlide = (index) => {
+    const total = gallery.length;
+    setActiveIndex((index + total) % total);
+  };
+
+  const handleTouchStart = (event) => {
+    setTouchStartX(event.changedTouches[0]?.clientX ?? null);
+  };
+
+  const handleTouchEnd = (event) => {
+    if (touchStartX === null) {
+      return;
+    }
+
+    const touchEndX = event.changedTouches[0]?.clientX ?? touchStartX;
+    const deltaX = touchStartX - touchEndX;
+    if (Math.abs(deltaX) >= 40) {
+      goToSlide(activeIndex + (deltaX > 0 ? 1 : -1));
+    }
+    setTouchStartX(null);
+  };
+
+  return (
+    <section className="mt-8 rounded-[2rem] border border-[var(--color-line)] bg-white p-4 shadow-[0_20px_60px_rgba(16,18,20,0.05)] sm:p-5">
+      <div
+        className="carousel-shell"
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+        aria-label={`${property.name} photo gallery`}
+      >
+        <figure className="overflow-hidden rounded-[1.75rem] bg-[var(--color-paper)]">
+          {activeItem.src ? (
+            <img
+              src={activeItem.src}
+              alt={activeItem.alt ?? activeItem.title}
+              className="carousel-image h-80 w-full object-cover sm:h-96"
+              loading="eager"
+            />
+          ) : (
+            <div className="h-80 bg-[linear-gradient(135deg,rgba(32,43,41,0.14),rgba(196,168,106,0.18))] sm:h-96" />
+          )}
+          <figcaption className="p-5">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <p className="font-heading text-3xl text-[var(--color-forest)]">{activeItem.title}</p>
+                <p className="mt-2 text-sm text-[var(--color-slate)]">{activeItem.copy}</p>
+              </div>
+              <p className="text-xs uppercase tracking-[0.22em] text-[var(--color-slate)]">
+                {activeIndex + 1} / {gallery.length}
+              </p>
+            </div>
+          </figcaption>
+        </figure>
+        {gallery.length > 1 && (
+          <>
+            <button
+              type="button"
+              className="carousel-arrow carousel-arrow-prev"
+              onClick={() => goToSlide(activeIndex - 1)}
+              aria-label="Previous photo"
+            >
+              ‹
+            </button>
+            <button
+              type="button"
+              className="carousel-arrow carousel-arrow-next"
+              onClick={() => goToSlide(activeIndex + 1)}
+              aria-label="Next photo"
+            >
+              ›
+            </button>
+          </>
+        )}
+      </div>
+      {gallery.length > 1 && (
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-4">
+          <div className="carousel-dots" aria-label="Select gallery image">
+            {gallery.map((item, index) => (
+              <button
+                key={`${item.src ?? item.title}-${index}`}
+                type="button"
+                className={`carousel-dot${index === activeIndex ? ' is-active' : ''}`}
+                onClick={() => goToSlide(index)}
+                aria-label={`Go to photo ${index + 1}`}
+                aria-pressed={index === activeIndex}
+              />
+            ))}
+          </div>
+          <div className="carousel-thumbnails">
+            {gallery.map((item, index) => (
+              <button
+                key={`thumb-${item.src ?? item.title}-${index}`}
+                type="button"
+                className={`carousel-thumbnail${index === activeIndex ? ' is-active' : ''}`}
+                onClick={() => goToSlide(index)}
+                aria-label={`Show ${item.title}`}
+              >
+                {item.src ? (
+                  <img src={item.src} alt="" className="h-full w-full object-cover" loading="lazy" />
+                ) : (
+                  <div className="h-full w-full bg-[linear-gradient(135deg,rgba(32,43,41,0.14),rgba(196,168,106,0.18))]" />
+                )}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+    </section>
+  );
+}
+
+function buildGoogleMapsEmbed(query) {
+  return `https://www.google.com/maps?q=${encodeURIComponent(query)}&z=14&output=embed`;
+}
+
 function BookingWidget({ propertyId }) {
   useEffect(() => {
     refreshBookingScript();
@@ -487,52 +652,8 @@ function BookingWidget({ propertyId }) {
       data-website-id="486498"
       data-rental-id={propertyId}
       data-currency="USD"
+      data-new-tab="true"
     />
-  );
-}
-
-function PhotoGallery({ property }) {
-  const [featured, ...gallery] = property.gallery;
-
-  if (!featured) {
-    return null;
-  }
-
-  return (
-    <div className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-      <figure className="overflow-hidden rounded-[1.75rem] border border-[var(--color-line)] bg-white shadow-[0_18px_45px_rgba(17,22,28,0.06)] md:col-span-2">
-        {featured.src ? (
-          <img
-            src={featured.src}
-            alt={featured.alt ?? featured.title}
-            className="h-80 w-full object-cover sm:h-96"
-            loading="eager"
-          />
-        ) : (
-          <div className="h-80 bg-[linear-gradient(135deg,rgba(32,43,41,0.14),rgba(196,168,106,0.18))] sm:h-96" />
-        )}
-        <figcaption className="p-5">
-          <p className="font-heading text-2xl text-[var(--color-forest)]">{featured.title}</p>
-          <p className="mt-2 text-sm text-[var(--color-slate)]">{featured.copy}</p>
-        </figcaption>
-      </figure>
-      {gallery.map((item, index) => (
-        <figure
-          key={`${item.src ?? item.title}-${index}`}
-          className="overflow-hidden rounded-[1.75rem] border border-[var(--color-line)] bg-white shadow-[0_18px_45px_rgba(17,22,28,0.06)]"
-        >
-          {item.src ? (
-            <img src={item.src} alt={item.alt ?? item.title} className="h-64 w-full object-cover" loading="lazy" />
-          ) : (
-            <div className="h-64 bg-[linear-gradient(135deg,rgba(32,43,41,0.14),rgba(196,168,106,0.18))]" />
-          )}
-          <figcaption className="p-5">
-            <p className="font-heading text-2xl text-[var(--color-forest)]">{item.title}</p>
-            <p className="mt-2 text-sm text-[var(--color-slate)]">{item.copy}</p>
-          </figcaption>
-        </figure>
-      ))}
-    </div>
   );
 }
 
