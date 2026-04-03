@@ -40,6 +40,8 @@ const bookingLinkProps = {
   style: mobileTapLinkStyle,
 };
 
+let lodgifyScriptPromise = null;
+
 function mergePropertyData(property) {
   const live = generatedData.properties?.[property.id];
   if (!live) {
@@ -87,14 +89,23 @@ function mergePropertyData(property) {
 function refreshBookingScript() {
   const existing = document.querySelector('script[data-lodgify-script="true"]');
   if (existing) {
-    existing.remove();
+    return lodgifyScriptPromise ?? Promise.resolve(existing);
   }
 
-  const script = document.createElement('script');
-  script.src = 'https://d3sn4z8h2vn7op.cloudfront.net/websites/lodgify-booking-widget.js';
-  script.async = true;
-  script.dataset.lodgifyScript = 'true';
-  document.body.appendChild(script);
+  lodgifyScriptPromise = new Promise((resolve, reject) => {
+    const script = document.createElement('script');
+    script.src = 'https://d3sn4z8h2vn7op.cloudfront.net/websites/lodgify-booking-widget.js';
+    script.async = true;
+    script.dataset.lodgifyScript = 'true';
+    script.onload = () => resolve(script);
+    script.onerror = (error) => {
+      lodgifyScriptPromise = null;
+      reject(error);
+    };
+    document.body.appendChild(script);
+  });
+
+  return lodgifyScriptPromise;
 }
 
 function useHashRoute() {
@@ -380,9 +391,9 @@ function Stat({ label, value }) {
 function PropertyPage({ property }) {
   return (
     <>
-      <section className="relative isolate overflow-hidden">
-        <div className="pointer-events-none absolute inset-0" style={{ background: property.theme }} />
-        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(120deg,rgba(11,17,20,0.84),rgba(11,17,20,0.28))]" />
+      <section className="relative isolate">
+        <div className="pointer-events-none absolute inset-0 overflow-hidden" style={{ background: property.theme }} />
+        <div className="pointer-events-none absolute inset-0 overflow-hidden bg-[linear-gradient(120deg,rgba(11,17,20,0.84),rgba(11,17,20,0.28))]" />
         <div className="relative z-10 mx-auto grid max-w-7xl gap-8 px-5 py-18 sm:px-8 lg:grid-cols-[1fr_360px] lg:gap-10 lg:py-22">
           <div className="max-w-3xl text-white">
             <p className="eyebrow">{property.shortLocation}</p>
@@ -423,7 +434,7 @@ function PropertyPage({ property }) {
         </div>
       </section>
 
-      <section className="mx-auto grid max-w-7xl gap-10 px-5 py-16 pb-28 sm:px-8 md:pb-16 lg:grid-cols-[1fr_380px]">
+      <section className="mx-auto grid max-w-7xl gap-10 px-5 py-16 pb-36 sm:px-8 md:pb-16 lg:grid-cols-[1fr_380px]">
         <div>
           <p className="eyebrow text-[var(--color-bronze)]">Property Details</p>
           <h2 className="section-title">Property photos, rates, and availability in one place</h2>
@@ -744,10 +755,7 @@ function AvailabilityCalendar({ property }) {
       return;
     }
 
-    const nextSelection = { checkIn: selection.checkIn, checkOut: day.iso };
-    setSelection(nextSelection);
-    const nextBookingUrl = buildLodgifyBookingUrl(property.bookingUrl, nextSelection.checkIn, nextSelection.checkOut);
-    window.open(nextBookingUrl, '_blank', 'noopener,noreferrer');
+    setSelection({ checkIn: selection.checkIn, checkOut: day.iso });
   };
 
   return (
