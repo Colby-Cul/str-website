@@ -8,6 +8,8 @@ const navItems = [
   { label: 'About', href: '#/about' },
 ];
 
+const mobileNavItems = [...navItems, { label: 'Contact', href: '#/about' }];
+
 const propertyPathMap = {
   '/properties/graeagle-family-cabin': '533203',
   '/properties/northstar-luxury-getaway': '746614',
@@ -125,9 +127,9 @@ function App() {
 }
 
 function SiteShell({ children, path, properties }) {
-  const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
 
-  const closeMobileNav = () => setMobileNavOpen(false);
+  const closeMobileNav = () => setMenuOpen(false);
 
   useEffect(() => {
     closeMobileNav();
@@ -155,26 +157,24 @@ function SiteShell({ children, path, properties }) {
             <button
               type="button"
               className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/15 text-[var(--color-paper)] transition hover:border-white/30 hover:text-white md:hidden"
-              aria-expanded={mobileNavOpen}
+              aria-expanded={menuOpen}
               aria-controls="mobile-nav-menu"
-              aria-label={mobileNavOpen ? 'Close navigation menu' : 'Open navigation menu'}
-              onClick={() => setMobileNavOpen((open) => !open)}
+              aria-label={menuOpen ? 'Close navigation menu' : 'Open navigation menu'}
+              onClick={() => setMenuOpen((open) => !open)}
             >
-              <span className="sr-only">{mobileNavOpen ? 'Close menu' : 'Open menu'}</span>
-              <span className="flex flex-col gap-1.5">
-                <span className="block h-0.5 w-5 bg-current" />
-                <span className="block h-0.5 w-5 bg-current" />
-                <span className="block h-0.5 w-5 bg-current" />
+              <span className="sr-only">{menuOpen ? 'Close menu' : 'Open menu'}</span>
+              <span className="text-3xl leading-none" aria-hidden="true">
+                ≡
               </span>
             </button>
           </div>
           <nav
             id="mobile-nav-menu"
-            className={`${mobileNavOpen ? 'mt-4 flex' : 'hidden'} mobile-nav-panel flex-col gap-2 text-sm uppercase tracking-[0.22em] text-[var(--color-mist)] md:hidden`}
+            className={`${menuOpen ? 'mt-4 flex' : 'hidden'} mobile-nav-panel flex-col text-base uppercase tracking-[0.22em] text-[var(--color-mist)] md:hidden`}
           >
-            {navItems.map((item) => (
+            {mobileNavItems.map((item) => (
               <a
-                key={item.href}
+                key={`${item.label}-${item.href}`}
                 href={item.href}
                 className="mobile-nav-link transition hover:text-white"
                 onClick={closeMobileNav}
@@ -187,7 +187,7 @@ function SiteShell({ children, path, properties }) {
       </header>
       <main>{children}</main>
       <footer className="border-t border-[var(--color-line)] bg-[var(--color-forest)]">
-        <div className="mx-auto grid max-w-7xl gap-8 px-5 py-10 text-sm text-[var(--color-mist)] sm:px-8 md:grid-cols-3">
+        <div className="mx-auto grid max-w-7xl gap-8 px-5 py-10 text-base text-[var(--color-mist)] sm:px-8 md:grid-cols-3">
           <div>
             <p className="font-heading text-2xl text-white">Pineside Cabins</p>
             <p className="mt-3 max-w-xs">
@@ -195,7 +195,7 @@ function SiteShell({ children, path, properties }) {
             </p>
           </div>
           <div>
-            <p className="text-xs uppercase tracking-[0.24em] text-[var(--color-accent)]">Properties</p>
+            <p className="stat-label text-[var(--color-accent)]">Properties</p>
             {properties.map((property) => (
               <a key={property.id} href={`#/properties/${property.slug}`} className="mt-3 block hover:text-white">
                 {property.name}
@@ -203,7 +203,7 @@ function SiteShell({ children, path, properties }) {
             ))}
           </div>
           <div>
-            <p className="text-xs uppercase tracking-[0.24em] text-[var(--color-accent)]">Booking</p>
+            <p className="stat-label text-[var(--color-accent)]">Booking</p>
             <p className="mt-3">Direct booking is powered by Lodgify for secure pricing and live availability.</p>
             <a href="#/about" className="mt-3 inline-block hover:text-white">
               Contact the host
@@ -221,27 +221,27 @@ function HomePage({ properties }) {
       <section className="hero-panel relative isolate overflow-hidden">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(196,168,106,0.35),transparent_34%),linear-gradient(135deg,rgba(14,16,18,0.92),rgba(26,34,33,0.72),rgba(60,73,79,0.44))]" />
         <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1800&q=80')] bg-cover bg-center opacity-30" />
-        <div className="relative mx-auto grid max-w-7xl gap-12 px-5 py-20 sm:px-8 lg:grid-cols-[1.2fr_0.8fr] lg:py-28">
+        <div className="relative mx-auto grid min-h-screen max-w-7xl content-center gap-10 px-5 py-24 sm:px-8 lg:min-h-0 lg:grid-cols-[1.2fr_0.8fr] lg:gap-12 lg:py-28">
           <div className="max-w-3xl">
             <p className="eyebrow">Luxury Sierra Retreats</p>
-            <h1 className="mt-5 max-w-3xl font-heading text-5xl leading-none text-white sm:text-6xl lg:text-7xl">
+            <h1 className="mt-5 max-w-3xl font-heading text-[clamp(2rem,9vw,4.75rem)] leading-[0.92] text-white lg:text-7xl">
               Escape to the Sierra
             </h1>
-            <p className="mt-6 max-w-2xl text-lg text-[var(--color-mist)] sm:text-xl">
+            <p className="mt-6 max-w-2xl text-base text-[var(--color-mist)] sm:text-xl">
               Two distinct mountain stays, one refined booking experience. Discover a family-ready cabin in Graeagle and an elevated alpine retreat near Northstar.
             </p>
-            <div className="mt-10 flex flex-wrap gap-4">
-              <a href={`#/properties/${properties[0].slug}`} className="button-primary">
+            <div className="mt-10 flex flex-col gap-4 sm:flex-row sm:flex-wrap">
+              <a href={`#/properties/${properties[0].slug}`} className="button-primary sm:w-auto">
                 Explore Graeagle
               </a>
-              <a href={`#/properties/${properties[1].slug}`} className="button-secondary">
+              <a href={`#/properties/${properties[1].slug}`} className="button-secondary sm:w-auto">
                 Explore Northstar
               </a>
             </div>
           </div>
-          <div className="glass-panel">
+          <div className="glass-panel self-end">
             <p className="eyebrow">Check Availability</p>
-            <p className="mt-3 text-sm text-[var(--color-mist)]">
+            <p className="mt-3 text-base text-[var(--color-mist)]">
               Search both properties from one place, then move directly into live Lodgify availability and pricing.
             </p>
             <div className="mt-6">
@@ -257,7 +257,7 @@ function HomePage({ properties }) {
             <p className="eyebrow text-[var(--color-bronze)]">Our Collection</p>
             <h2 className="section-title">Mountain homes with a resort sensibility</h2>
           </div>
-          <a href="#/properties" className="text-sm uppercase tracking-[0.22em] text-[var(--color-slate)] transition hover:text-[var(--color-forest)]">
+          <a href="#/properties" className="text-base uppercase tracking-[0.22em] text-[var(--color-slate)] transition hover:text-[var(--color-forest)]">
             View all properties
           </a>
         </div>
@@ -306,16 +306,22 @@ function PropertiesPage({ properties }) {
 }
 
 function PropertyCard({ property, detailed = false }) {
+  const cardImage = property.heroImage || property.gallery?.[0]?.src;
+
   return (
     <article className="overflow-hidden rounded-[2rem] border border-white/40 bg-white shadow-[0_22px_70px_rgba(11,17,20,0.08)]">
-      <div className="min-h-[320px] p-7 text-white" style={{ background: property.theme }}>
-        <div className="flex h-full flex-col justify-between rounded-[1.5rem] border border-white/12 bg-black/10 p-6 backdrop-blur-[2px]">
+      <div className="relative aspect-video overflow-hidden" style={{ background: property.theme }}>
+        {cardImage ? (
+          <img src={cardImage} alt={property.name} className="h-full w-full object-cover" loading="lazy" />
+        ) : null}
+        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(11,17,20,0.08),rgba(11,17,20,0.78))]" />
+        <div className="absolute inset-x-4 bottom-4 rounded-[1.5rem] border border-white/12 bg-black/25 p-5 text-white backdrop-blur-[4px] sm:inset-x-6 sm:bottom-6 sm:p-6">
           <div>
             <p className="eyebrow text-[var(--color-accent)]">{property.shortLocation}</p>
-            <h2 className="mt-4 font-heading text-4xl leading-tight">{property.name}</h2>
-            <p className="mt-4 max-w-md text-[15px] text-[rgba(242,238,232,0.88)]">{property.tagline}</p>
+            <h2 className="mt-3 font-heading text-[2rem] leading-tight sm:text-4xl">{property.name}</h2>
+            <p className="mt-3 max-w-md text-base text-[rgba(242,238,232,0.88)]">{property.tagline}</p>
           </div>
-          <div className="flex flex-wrap gap-3 text-sm">
+          <div className="mt-5 flex flex-wrap gap-3 text-base">
             <span className="pill">{property.rates.nightlyRange} / night</span>
             <span className="pill">{property.rating.toFixed(1)} stars</span>
             <span className="pill">{property.reviewLabel}</span>
@@ -323,13 +329,13 @@ function PropertyCard({ property, detailed = false }) {
         </div>
       </div>
       <div className="space-y-6 p-7">
-        <div className="grid gap-3 text-sm text-[var(--color-slate)] sm:grid-cols-3">
+        <div className="grid gap-3 text-base text-[var(--color-slate)] sm:grid-cols-3">
           <Stat label="Guests" value={property.maxGuests} />
           <Stat label="Bedrooms" value={property.bedrooms} />
           <Stat label="Baths" value={property.bathrooms} />
         </div>
-        <p className="text-[var(--color-slate)]">{detailed ? property.description : property.overview}</p>
-        <div className="flex flex-wrap gap-3">
+        <p className="text-base text-[var(--color-slate)]">{detailed ? property.description : property.overview}</p>
+        <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
           <a href={`#/properties/${property.slug}`} className="button-primary">
             View property
           </a>
@@ -345,8 +351,8 @@ function PropertyCard({ property, detailed = false }) {
 function Stat({ label, value }) {
   return (
     <div className="rounded-2xl bg-[var(--color-paper)] px-4 py-3">
-      <p className="text-[10px] uppercase tracking-[0.24em]">{label}</p>
-      <p className="mt-2 text-lg font-medium text-[var(--color-forest)]">{value}</p>
+      <p className="stat-label">{label}</p>
+      <p className="mt-2 text-xl font-medium text-[var(--color-forest)]">{value}</p>
     </div>
   );
 }
@@ -357,11 +363,11 @@ function PropertyPage({ property }) {
       <section className="relative isolate overflow-hidden">
         <div className="absolute inset-0" style={{ background: property.theme }} />
         <div className="absolute inset-0 bg-[linear-gradient(120deg,rgba(11,17,20,0.84),rgba(11,17,20,0.28))]" />
-        <div className="relative mx-auto grid max-w-7xl gap-10 px-5 py-18 sm:px-8 lg:grid-cols-[1fr_360px] lg:py-22">
+        <div className="relative mx-auto grid max-w-7xl gap-8 px-5 py-18 sm:px-8 lg:grid-cols-[1fr_360px] lg:gap-10 lg:py-22">
           <div className="max-w-3xl text-white">
             <p className="eyebrow">{property.shortLocation}</p>
-            <h1 className="mt-5 font-heading text-5xl leading-none sm:text-6xl">{property.name}</h1>
-            <p className="mt-5 max-w-2xl text-lg text-[var(--color-mist)]">{property.description}</p>
+            <h1 className="mt-5 font-heading text-[clamp(2.1rem,9vw,4.2rem)] leading-[0.94] sm:text-6xl">{property.name}</h1>
+            <p className="mt-5 max-w-2xl text-base text-[var(--color-mist)] sm:text-lg">{property.description}</p>
             <div className="mt-8 flex flex-wrap gap-3">
               <a href={property.bookingUrl} className="button-primary" target="_blank" rel="noreferrer">
                 Book {property.shortLocation.includes('Graeagle') ? 'Graeagle' : 'Northstar'}
@@ -373,7 +379,7 @@ function PropertyPage({ property }) {
           </div>
           <div className="glass-panel lg:mt-10">
             <p className="eyebrow">Stay Snapshot</p>
-            <dl className="mt-5 space-y-4 text-sm text-[var(--color-mist)]">
+            <dl className="mt-5 space-y-4 text-base text-[var(--color-mist)]">
               <DataRow label="Address" value={property.address} />
               <DataRow label="Bedrooms" value={property.bedrooms} />
               <DataRow label="Bathrooms" value={property.bathrooms} />
@@ -384,7 +390,7 @@ function PropertyPage({ property }) {
                 <iframe
                   title={`${property.name} map`}
                   src={property.mapEmbedUrl}
-                  className="block h-[300px] w-full border-0"
+                  className="block h-[250px] w-full border-0 md:h-[300px]"
                   loading="lazy"
                   referrerPolicy="no-referrer-when-downgrade"
                   allowFullScreen
@@ -395,7 +401,7 @@ function PropertyPage({ property }) {
         </div>
       </section>
 
-      <section className="mx-auto grid max-w-7xl gap-10 px-5 py-16 sm:px-8 lg:grid-cols-[1fr_380px]">
+      <section className="mx-auto grid max-w-7xl gap-10 px-5 py-16 pb-28 sm:px-8 md:pb-16 lg:grid-cols-[1fr_380px]">
         <div>
           <p className="eyebrow text-[var(--color-bronze)]">Property Details</p>
           <h2 className="section-title">Property photos, rates, and availability in one place</h2>
@@ -428,14 +434,14 @@ function PropertyPage({ property }) {
           <div className="rounded-[2rem] border border-[var(--color-line)] bg-white p-7 shadow-[0_22px_70px_rgba(11,17,20,0.08)]">
             <p className="eyebrow text-[var(--color-bronze)]">Nightly Pricing</p>
             <p className="mt-3 font-heading text-4xl text-[var(--color-forest)]">{property.rates.nightlyRange}</p>
-            <p className="mt-2 text-sm text-[var(--color-slate)]">
+            <p className="mt-2 text-base text-[var(--color-slate)]">
               Average nightly rate: {formatCurrency(property.rates.avgNightly, property.rates.currency)}
             </p>
             <div className="mt-5 space-y-3">
               {property.rates.seasonalPricing?.slice(0, 4).map((entry) => (
                 <div
                   key={entry.month}
-                  className="flex items-center justify-between rounded-2xl bg-[var(--color-paper)] px-4 py-3 text-sm text-[var(--color-slate)]"
+                  className="flex items-center justify-between rounded-2xl bg-[var(--color-paper)] px-4 py-3 text-base text-[var(--color-slate)]"
                 >
                   <span>{formatMonth(entry.month)}</span>
                   <span>
@@ -447,7 +453,7 @@ function PropertyPage({ property }) {
           </div>
           <div className="rounded-[2rem] border border-[var(--color-line)] bg-white p-7 shadow-[0_22px_70px_rgba(11,17,20,0.08)]">
             <p className="eyebrow text-[var(--color-bronze)]">Book Direct</p>
-            <p className="mt-3 text-sm text-[var(--color-slate)]">
+            <p className="mt-3 text-base text-[var(--color-slate)]">
               Live rates and availability are surfaced directly from Lodgify.
             </p>
             <a href={property.bookingUrl} className="button-primary mt-5 w-full" target="_blank" rel="noreferrer">
@@ -459,6 +465,11 @@ function PropertyPage({ property }) {
           </div>
         </aside>
       </section>
+      <div className="mobile-booking-bar md:hidden">
+        <a href={property.bookingUrl} className="button-primary w-full" target="_blank" rel="noreferrer">
+          Book {property.name}
+        </a>
+      </div>
     </>
   );
 }
@@ -466,8 +477,8 @@ function PropertyPage({ property }) {
 function DataRow({ label, value }) {
   return (
     <div>
-      <dt className="text-[10px] uppercase tracking-[0.24em] text-[var(--color-accent)]">{label}</dt>
-      <dd className="mt-1 text-white">{value}</dd>
+      <dt className="stat-label text-[var(--color-accent)]">{label}</dt>
+      <dd className="mt-1 text-base text-white">{value}</dd>
     </div>
   );
 }
@@ -592,19 +603,19 @@ function PhotoGallery({ property }) {
             <img
               src={activeItem.src}
               alt={activeItem.alt ?? activeItem.title}
-              className="carousel-image h-80 w-full object-cover sm:h-96"
+              className="carousel-image aspect-video w-full object-cover"
               loading="eager"
             />
           ) : (
-            <div className="h-80 bg-[linear-gradient(135deg,rgba(32,43,41,0.14),rgba(196,168,106,0.18))] sm:h-96" />
+            <div className="aspect-video bg-[linear-gradient(135deg,rgba(32,43,41,0.14),rgba(196,168,106,0.18))]" />
           )}
           <figcaption className="p-5">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
               <div>
                 <p className="font-heading text-3xl text-[var(--color-forest)]">{activeItem.title}</p>
-                <p className="mt-2 text-sm text-[var(--color-slate)]">{activeItem.copy}</p>
+                <p className="mt-2 text-base text-[var(--color-slate)]">{activeItem.copy}</p>
               </div>
-              <p className="text-xs uppercase tracking-[0.22em] text-[var(--color-slate)]">
+              <p className="stat-label text-[var(--color-slate)]">
                 {activeIndex + 1} / {gallery.length}
               </p>
             </div>
@@ -695,9 +706,9 @@ function AvailabilityCalendar({ property }) {
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <p className="font-heading text-3xl text-[var(--color-forest)]">Availability Calendar</p>
-          <p className="mt-2 text-sm text-[var(--color-slate)]">{property.availabilitySummary}</p>
+          <p className="mt-2 text-base text-[var(--color-slate)]">{property.availabilitySummary}</p>
         </div>
-        <div className="flex items-center gap-4 text-xs uppercase tracking-[0.18em] text-[var(--color-slate)]">
+        <div className="flex flex-wrap items-center gap-4 text-base text-[var(--color-slate)]">
           <LegendSwatch className="bg-[var(--color-forest)]" label="Available" />
           <LegendSwatch className="bg-[var(--color-accent)]" label="Booked" />
           <LegendSwatch className="bg-[var(--color-paper)] border border-[var(--color-line)]" label="Outside month" />
@@ -708,11 +719,11 @@ function AvailabilityCalendar({ property }) {
           <div key={month.label} className="rounded-[1.5rem] bg-[var(--color-paper)] p-4">
             <div className="flex items-center justify-between">
               <p className="font-heading text-2xl text-[var(--color-forest)]">{month.label}</p>
-              <p className="text-xs uppercase tracking-[0.22em] text-[var(--color-slate)]">
+              <p className="stat-label text-[var(--color-slate)]">
                 {month.availableCount} open
               </p>
             </div>
-            <div className="mt-4 grid grid-cols-7 gap-2 text-center text-[11px] uppercase tracking-[0.2em] text-[var(--color-slate)]">
+            <div className="stat-label mt-4 grid grid-cols-7 gap-2 text-center text-[var(--color-slate)]">
               {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
                 <span key={day}>{day}</span>
               ))}
@@ -721,7 +732,7 @@ function AvailabilityCalendar({ property }) {
               {month.days.map((day, index) => (
                 <div
                   key={`${month.label}-${index}`}
-                  className={`flex aspect-square items-center justify-center rounded-xl text-sm font-medium ${
+                  className={`flex aspect-square items-center justify-center rounded-xl text-base font-medium ${
                     day.inMonth
                       ? day.available
                         ? 'bg-[var(--color-forest)] text-white'
