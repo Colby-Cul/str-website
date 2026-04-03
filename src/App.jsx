@@ -29,14 +29,16 @@ function mergePropertyData(property) {
     bathrooms: live.bathrooms || property.bathrooms,
     amenities: live.amenities?.length ? live.amenities : property.amenities,
     gallery:
-      live.gallery?.length
-        ? live.gallery.map((image) => ({
-            title: image.alt || 'Property photo',
-            copy: image.alt || 'Live property photography synced from Lodgify.',
-            src: image.src,
-            alt: image.alt || 'Property photo',
-          }))
-        : property.gallery,
+      property.gallery?.length
+        ? property.gallery
+        : live.gallery?.length
+          ? live.gallery.map((image) => ({
+              title: image.alt || 'Property photo',
+              copy: image.alt || 'Live property photography synced from Lodgify.',
+              src: image.src,
+              alt: image.alt || 'Property photo',
+            }))
+          : property.gallery,
     rates: {
       ...property.rates,
       nightlyRange: live.rates?.nightlyRange || property.rates.nightlyRange,
@@ -324,7 +326,7 @@ function PropertyPage({ property }) {
       <section className="mx-auto grid max-w-7xl gap-10 px-5 py-16 sm:px-8 lg:grid-cols-[1fr_380px]">
         <div>
           <p className="eyebrow text-[var(--color-bronze)]">Property Details</p>
-          <h2 className="section-title">Live photos, rates, and availability from Lodgify</h2>
+          <h2 className="section-title">Property photos, rates, and availability in one place</h2>
           <PhotoGallery property={property} />
           <AvailabilityCalendar property={property} />
           <div className="mt-10 grid gap-8 lg:grid-cols-[1fr_0.9fr]">
@@ -490,15 +492,37 @@ function BookingWidget({ propertyId }) {
 }
 
 function PhotoGallery({ property }) {
+  const [featured, ...gallery] = property.gallery;
+
+  if (!featured) {
+    return null;
+  }
+
   return (
-    <div className="mt-8 grid gap-4 md:grid-cols-3">
-      {property.gallery.slice(0, 6).map((item, index) => (
+    <div className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+      <figure className="overflow-hidden rounded-[1.75rem] border border-[var(--color-line)] bg-white shadow-[0_18px_45px_rgba(17,22,28,0.06)] md:col-span-2">
+        {featured.src ? (
+          <img
+            src={featured.src}
+            alt={featured.alt ?? featured.title}
+            className="h-80 w-full object-cover sm:h-96"
+            loading="eager"
+          />
+        ) : (
+          <div className="h-80 bg-[linear-gradient(135deg,rgba(32,43,41,0.14),rgba(196,168,106,0.18))] sm:h-96" />
+        )}
+        <figcaption className="p-5">
+          <p className="font-heading text-2xl text-[var(--color-forest)]">{featured.title}</p>
+          <p className="mt-2 text-sm text-[var(--color-slate)]">{featured.copy}</p>
+        </figcaption>
+      </figure>
+      {gallery.map((item, index) => (
         <figure
           key={`${item.src ?? item.title}-${index}`}
           className="overflow-hidden rounded-[1.75rem] border border-[var(--color-line)] bg-white shadow-[0_18px_45px_rgba(17,22,28,0.06)]"
         >
           {item.src ? (
-            <img src={item.src} alt={item.alt ?? item.title} className="h-64 w-full object-cover" />
+            <img src={item.src} alt={item.alt ?? item.title} className="h-64 w-full object-cover" loading="lazy" />
           ) : (
             <div className="h-64 bg-[linear-gradient(135deg,rgba(32,43,41,0.14),rgba(196,168,106,0.18))]" />
           )}
