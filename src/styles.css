@@ -311,6 +311,10 @@ a {
   transform: translateY(-1px);
 }
 
+.availability-months button:disabled {
+  cursor: default;
+}
+
 /* ─── Sticky booking CTA (mobile only) ─── */
 .sticky-book-cta {
   display: none;
@@ -428,6 +432,19 @@ a {
   /* ── Availability calendar: single column ── */
   .availability-grid {
     grid-template-columns: 1fr !important;
+  }
+
+  .availability-months {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(18rem, 88vw);
+    overflow-x: auto;
+    padding-bottom: 0.5rem;
+    scroll-snap-type: x proximity;
+  }
+
+  .availability-months > * {
+    scroll-snap-align: start;
   }
 
   /* ── Nav mobile hamburger: ensure 44px tap target ── */

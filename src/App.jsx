@@ -706,25 +706,68 @@ function BookingWidget({ propertyId }) {
 }
 
 function AvailabilityCalendar({ property }) {
-  const months = useMemo(() => buildCalendarMonths(property.liveAvailability?.calendar, 3), [property.liveAvailability]);
+  const months = useMemo(
+    () => buildCalendarMonths(property.liveAvailability?.calendar, property.liveAvailability?.startDate, 12),
+    [property.liveAvailability],
+  );
+  const [selection, setSelection] = useState({ checkIn: null, checkOut: null });
+
+  useEffect(() => {
+    setSelection({ checkIn: null, checkOut: null });
+  }, [property.id]);
+
   if (!months.length) {
     return null;
   }
+
+  const bookingUrl = buildLodgifyBookingUrl(property.bookingUrl, selection.checkIn, selection.checkOut);
+
+  const handleDateClick = (day) => {
+    if (!day.inMonth || !day.available) {
+      return;
+    }
+
+    if (!selection.checkIn || selection.checkOut || day.iso <= selection.checkIn) {
+      setSelection({ checkIn: day.iso, checkOut: null });
+      return;
+    }
+
+    const nextSelection = { checkIn: selection.checkIn, checkOut: day.iso };
+    setSelection(nextSelection);
+    const nextBookingUrl = buildLodgifyBookingUrl(property.bookingUrl, nextSelection.checkIn, nextSelection.checkOut);
+    window.open(nextBookingUrl, '_blank', 'noopener,noreferrer');
+  };
 
   return (
     <section className="mt-10 rounded-[2rem] border border-[var(--color-line)] bg-white p-7 shadow-[0_20px_60px_rgba(16,18,20,0.05)]">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <p className="font-heading text-3xl text-[var(--color-forest)]">Availability Calendar</p>
-          <p className="mt-2 text-base text-[var(--color-slate)]">{property.availabilitySummary}</p>
+          <p className="font-heading text-3xl text-[var(--color-forest)]">Check Availability</p>
+          <p className="mt-2 text-base text-[var(--color-slate)]">
+            {selection.checkIn && selection.checkOut
+              ? `Selected stay: ${formatSelectedDate(selection.checkIn)} to ${formatSelectedDate(selection.checkOut)}`
+              : selection.checkIn
+                ? `Check-in selected for ${formatSelectedDate(selection.checkIn)}. Choose your check-out date next.`
+                : property.availabilitySummary}
+          </p>
         </div>
         <div className="flex flex-wrap items-center gap-4 text-base text-[var(--color-slate)]">
           <LegendSwatch className="bg-[var(--color-forest)]" label="Available" />
           <LegendSwatch className="bg-[var(--color-accent)]" label="Booked" />
-          <LegendSwatch className="bg-[var(--color-paper)] border border-[var(--color-line)]" label="Outside month" />
+          <LegendSwatch className="bg-[var(--color-bronze)]" label="Selected" />
         </div>
       </div>
-      <div className="mt-6 grid gap-6 xl:grid-cols-3">
+      <div className="mt-6 flex items-center justify-between gap-4 rounded-[1.5rem] bg-[var(--color-paper)] p-4">
+        <div className="text-sm text-[var(--color-slate)] sm:text-base">
+          Booked dates are disabled. Selecting a full stay opens Lodgify with your dates pre-filled.
+        </div>
+        {selection.checkIn && selection.checkOut ? (
+          <a href={bookingUrl} className="button-primary shrink-0" target="_blank" rel="noopener noreferrer">
+            Book selected stay
+          </a>
+        ) : null}
+      </div>
+      <div className="availability-months mt-6 grid gap-6 xl:grid-cols-3">
         {months.map((month) => (
           <div key={month.label} className="rounded-[1.5rem] bg-[var(--color-paper)] p-4">
             <div className="flex items-center justify-between">
@@ -740,18 +783,26 @@ function AvailabilityCalendar({ property }) {
             </div>
             <div className="mt-3 grid grid-cols-7 gap-2">
               {month.days.map((day, index) => (
-                <div
+                <button
                   key={`${month.label}-${index}`}
-                  className={`flex aspect-square items-center justify-center rounded-xl text-base font-medium ${
+                  type="button"
+                  className={`flex aspect-square items-center justify-center rounded-xl border text-base font-medium transition ${
                     day.inMonth
                       ? day.available
-                        ? 'bg-[var(--color-forest)] text-white'
-                        : 'bg-[var(--color-accent)] text-[var(--color-forest)]'
-                      : 'bg-white/60 text-[var(--color-slate)]'
+                        ? isDateSelected(day.iso, selection)
+                          ? 'border-[var(--color-bronze)] bg-[var(--color-bronze)] text-white'
+                          : isDateInSelectedRange(day.iso, selection)
+                            ? 'border-[var(--color-accent)] bg-[rgba(196,168,106,0.22)] text-[var(--color-forest)]'
+                            : 'border-transparent bg-[var(--color-forest)] text-white hover:bg-[var(--color-primary-lighter,#31403d)]'
+                        : 'border-transparent bg-[var(--color-accent)] text-[var(--color-forest)] opacity-75'
+                      : 'border-[var(--color-line)] bg-white/60 text-[var(--color-slate)]'
                   }`}
+                  disabled={!day.inMonth || !day.available}
+                  onClick={() => handleDateClick(day)}
+                  aria-label={buildDateAriaLabel(day, selection)}
                 >
                   {day.dayNumber}
-                </div>
+                </button>
               ))}
             </div>
           </div>
@@ -790,14 +841,14 @@ function formatMonth(monthKey) {
   });
 }
 
-function buildCalendarMonths(calendar, count) {
+function buildCalendarMonths(calendar, calendarStartDate, count) {
   if (!calendar) {
     return [];
   }
 
-  const today = new Date();
+  const startMonth = startOfMonth(calendarStartDate);
   return Array.from({ length: count }, (_, index) => {
-    const monthDate = new Date(today.getFullYear(), today.getMonth() + index, 1);
+    const monthDate = new Date(startMonth.getFullYear(), startMonth.getMonth() + index, 1);
     const year = monthDate.getFullYear();
     const month = monthDate.getMonth();
     const firstDayOfMonth = new Date(year, month, 1);
@@ -818,6 +869,7 @@ function buildCalendarMonths(calendar, count) {
       }
 
       days.push({
+        iso,
         dayNumber: date.getDate(),
         inMonth,
         available,
@@ -833,6 +885,62 @@ function buildCalendarMonths(calendar, count) {
       days,
     };
   });
+}
+
+function startOfMonth(iso) {
+  if (!iso) {
+    const today = new Date();
+    return new Date(today.getFullYear(), today.getMonth(), 1);
+  }
+
+  const [year, month] = iso.split('-').map(Number);
+  return new Date(year, month - 1, 1);
+}
+
+function isDateSelected(iso, selection) {
+  return Boolean(iso && (iso === selection.checkIn || iso === selection.checkOut));
+}
+
+function isDateInSelectedRange(iso, selection) {
+  return Boolean(selection.checkIn && selection.checkOut && iso > selection.checkIn && iso < selection.checkOut);
+}
+
+function formatSelectedDate(iso) {
+  return new Date(`${iso}T00:00:00`).toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  });
+}
+
+function buildLodgifyBookingUrl(baseUrl, checkIn, checkOut) {
+  if (!baseUrl || !checkIn || !checkOut) {
+    return baseUrl;
+  }
+
+  const url = new URL(baseUrl);
+  url.searchParams.set('checkIn', checkIn);
+  url.searchParams.set('checkOut', checkOut);
+  return url.toString();
+}
+
+function buildDateAriaLabel(day, selection) {
+  if (!day.inMonth) {
+    return `Outside current month, ${day.dayNumber}`;
+  }
+
+  const parts = [formatSelectedDate(day.iso)];
+  parts.push(day.available ? 'available' : 'booked');
+
+  if (day.iso === selection.checkIn) {
+    parts.push('selected check-in');
+  } else if (day.iso === selection.checkOut) {
+    parts.push('selected check-out');
+  } else if (isDateInSelectedRange(day.iso, selection)) {
+    parts.push('selected stay');
+  }
+
+  return parts.join(', ');
 }
 
 export default App;
