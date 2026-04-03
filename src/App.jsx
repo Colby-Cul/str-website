@@ -17,12 +17,12 @@ const propertyPathMap = {
 
 const propertyMeta = {
   '533203': {
-    bookingUrl: 'https://booking.lodgify.com/533203',
+    bookingUrl: 'https://checkout.lodgify.com/en/pinesidecabins/533203/reservation',
     mapEmbedUrl: 'https://maps.google.com/maps?q=47+Shasta+Trail+Graeagle+CA+96103&output=embed',
     mapHeading: '47 Shasta Trail, Graeagle, CA 96103',
   },
   '746614': {
-    bookingUrl: 'https://booking.lodgify.com/746614',
+    bookingUrl: 'https://checkout.lodgify.com/en/pinesidecabins/746614/reservation',
     mapEmbedUrl: 'https://maps.google.com/maps?q=210+Bitter+Brush+Way+Truckee+CA+96161&output=embed',
     mapHeading: '210 Bitter Brush Way, Placer County, CA 96161',
   },
@@ -919,8 +919,10 @@ function buildLodgifyBookingUrl(baseUrl, checkIn, checkOut) {
   }
 
   const url = new URL(baseUrl);
-  url.searchParams.set('checkIn', checkIn);
-  url.searchParams.set('checkOut', checkOut);
+  url.searchParams.delete('checkIn');
+  url.searchParams.delete('checkOut');
+  url.searchParams.set('arrival', checkIn);
+  url.searchParams.set('departure', checkOut);
   return url.toString();
 }
 
