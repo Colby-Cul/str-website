@@ -24,13 +24,31 @@ function mergePropertyData(property) {
     name: live.name || property.name,
     description: live.description || property.description,
     address: live.address || property.address,
+    maxGuests: live.maxGuests || property.maxGuests,
+    bedrooms: live.bedrooms || property.bedrooms,
+    bathrooms: live.bathrooms || property.bathrooms,
+    amenities: live.amenities?.length ? live.amenities : property.amenities,
+    gallery:
+      live.gallery?.length
+        ? live.gallery.map((image) => ({
+            title: image.alt || 'Property photo',
+            copy: image.alt || 'Live property photography synced from Lodgify.',
+            src: image.src,
+            alt: image.alt || 'Property photo',
+          }))
+        : property.gallery,
     rates: {
       ...property.rates,
-      nightlyRange: live.nightlyRange || property.rates.nightlyRange,
-      avgNightly: live.avgNightly || property.rates.avgNightly,
-      currency: live.currency || property.rates.currency,
+      nightlyRange: live.rates?.nightlyRange || property.rates.nightlyRange,
+      avgNightly: live.rates?.avg || property.rates.avgNightly,
+      currency: live.rates?.currency || property.rates.currency,
+      min: live.rates?.min ?? property.rates.min,
+      max: live.rates?.max ?? property.rates.max,
+      seasonalPricing: live.rates?.seasonalPricing ?? [],
     },
     availabilitySummary: live.availabilitySummary || property.availabilitySummary,
+    liveAvailability: live.availability || null,
+    heroImage: live.heroImage || null,
   };
 }
 
@@ -306,19 +324,9 @@ function PropertyPage({ property }) {
       <section className="mx-auto grid max-w-7xl gap-10 px-5 py-16 sm:px-8 lg:grid-cols-[1fr_380px]">
         <div>
           <p className="eyebrow text-[var(--color-bronze)]">Property Details</p>
-          <h2 className="section-title">Designed for elevated mountain stays</h2>
-          <div className="mt-8 grid gap-4 md:grid-cols-3">
-            {property.gallery.map((item) => (
-              <div
-                key={item.title}
-                className="min-h-[240px] rounded-[1.75rem] border border-[var(--color-line)] bg-[linear-gradient(180deg,#faf8f3,#eae4d7)] p-6 shadow-[0_18px_45px_rgba(17,22,28,0.06)]"
-              >
-                <p className="font-heading text-2xl text-[var(--color-forest)]">{item.title}</p>
-                <p className="mt-3 text-sm text-[var(--color-slate)]">{item.copy}</p>
-                <div className="mt-6 h-28 rounded-[1.25rem] bg-[linear-gradient(135deg,rgba(32,43,41,0.14),rgba(196,168,106,0.18))]" />
-              </div>
-            ))}
-          </div>
+          <h2 className="section-title">Live photos, rates, and availability from Lodgify</h2>
+          <PhotoGallery property={property} />
+          <AvailabilityCalendar property={property} />
           <div className="mt-10 grid gap-8 lg:grid-cols-[1fr_0.9fr]">
             <div className="rounded-[2rem] border border-[var(--color-line)] bg-white p-7 shadow-[0_20px_60px_rgba(16,18,20,0.05)]">
               <p className="font-heading text-3xl text-[var(--color-forest)]">Amenities</p>
@@ -351,6 +359,26 @@ function PropertyPage({ property }) {
           </div>
         </div>
         <aside className="space-y-6">
+          <div className="rounded-[2rem] border border-[var(--color-line)] bg-white p-7 shadow-[0_22px_70px_rgba(11,17,20,0.08)]">
+            <p className="eyebrow text-[var(--color-bronze)]">Nightly Pricing</p>
+            <p className="mt-3 font-heading text-4xl text-[var(--color-forest)]">{property.rates.nightlyRange}</p>
+            <p className="mt-2 text-sm text-[var(--color-slate)]">
+              Average nightly rate: {formatCurrency(property.rates.avgNightly, property.rates.currency)}
+            </p>
+            <div className="mt-5 space-y-3">
+              {property.rates.seasonalPricing?.slice(0, 4).map((entry) => (
+                <div
+                  key={entry.month}
+                  className="flex items-center justify-between rounded-2xl bg-[var(--color-paper)] px-4 py-3 text-sm text-[var(--color-slate)]"
+                >
+                  <span>{formatMonth(entry.month)}</span>
+                  <span>
+                    {formatCurrency(entry.min, property.rates.currency)}-{formatCurrency(entry.max, property.rates.currency)}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
           <div className="rounded-[2rem] border border-[var(--color-line)] bg-white p-7 shadow-[0_22px_70px_rgba(11,17,20,0.08)]">
             <p className="eyebrow text-[var(--color-bronze)]">Book Direct</p>
             <p className="mt-3 text-sm text-[var(--color-slate)]">
@@ -459,6 +487,159 @@ function BookingWidget({ propertyId }) {
       data-currency="USD"
     />
   );
+}
+
+function PhotoGallery({ property }) {
+  return (
+    <div className="mt-8 grid gap-4 md:grid-cols-3">
+      {property.gallery.slice(0, 6).map((item, index) => (
+        <figure
+          key={`${item.src ?? item.title}-${index}`}
+          className="overflow-hidden rounded-[1.75rem] border border-[var(--color-line)] bg-white shadow-[0_18px_45px_rgba(17,22,28,0.06)]"
+        >
+          {item.src ? (
+            <img src={item.src} alt={item.alt ?? item.title} className="h-64 w-full object-cover" />
+          ) : (
+            <div className="h-64 bg-[linear-gradient(135deg,rgba(32,43,41,0.14),rgba(196,168,106,0.18))]" />
+          )}
+          <figcaption className="p-5">
+            <p className="font-heading text-2xl text-[var(--color-forest)]">{item.title}</p>
+            <p className="mt-2 text-sm text-[var(--color-slate)]">{item.copy}</p>
+          </figcaption>
+        </figure>
+      ))}
+    </div>
+  );
+}
+
+function AvailabilityCalendar({ property }) {
+  const months = useMemo(() => buildCalendarMonths(property.liveAvailability?.calendar, 3), [property.liveAvailability]);
+  if (!months.length) {
+    return null;
+  }
+
+  return (
+    <section className="mt-10 rounded-[2rem] border border-[var(--color-line)] bg-white p-7 shadow-[0_20px_60px_rgba(16,18,20,0.05)]">
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <p className="font-heading text-3xl text-[var(--color-forest)]">Availability Calendar</p>
+          <p className="mt-2 text-sm text-[var(--color-slate)]">{property.availabilitySummary}</p>
+        </div>
+        <div className="flex items-center gap-4 text-xs uppercase tracking-[0.18em] text-[var(--color-slate)]">
+          <LegendSwatch className="bg-[var(--color-forest)]" label="Available" />
+          <LegendSwatch className="bg-[var(--color-accent)]" label="Booked" />
+          <LegendSwatch className="bg-[var(--color-paper)] border border-[var(--color-line)]" label="Outside month" />
+        </div>
+      </div>
+      <div className="mt-6 grid gap-6 xl:grid-cols-3">
+        {months.map((month) => (
+          <div key={month.label} className="rounded-[1.5rem] bg-[var(--color-paper)] p-4">
+            <div className="flex items-center justify-between">
+              <p className="font-heading text-2xl text-[var(--color-forest)]">{month.label}</p>
+              <p className="text-xs uppercase tracking-[0.22em] text-[var(--color-slate)]">
+                {month.availableCount} open
+              </p>
+            </div>
+            <div className="mt-4 grid grid-cols-7 gap-2 text-center text-[11px] uppercase tracking-[0.2em] text-[var(--color-slate)]">
+              {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
+                <span key={day}>{day}</span>
+              ))}
+            </div>
+            <div className="mt-3 grid grid-cols-7 gap-2">
+              {month.days.map((day, index) => (
+                <div
+                  key={`${month.label}-${index}`}
+                  className={`flex aspect-square items-center justify-center rounded-xl text-sm font-medium ${
+                    day.inMonth
+                      ? day.available
+                        ? 'bg-[var(--color-forest)] text-white'
+                        : 'bg-[var(--color-accent)] text-[var(--color-forest)]'
+                      : 'bg-white/60 text-[var(--color-slate)]'
+                  }`}
+                >
+                  {day.dayNumber}
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function LegendSwatch({ className, label }) {
+  return (
+    <span className="flex items-center gap-2">
+      <span className={`h-3 w-3 rounded-full ${className}`} />
+      <span>{label}</span>
+    </span>
+  );
+}
+
+function formatCurrency(amount, currency = 'USD') {
+  if (typeof amount !== 'number' || !Number.isFinite(amount)) {
+    return 'Unavailable';
+  }
+
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency,
+    maximumFractionDigits: 0,
+  }).format(amount);
+}
+
+function formatMonth(monthKey) {
+  const [year, month] = monthKey.split('-').map(Number);
+  return new Date(year, month - 1, 1).toLocaleDateString('en-US', {
+    month: 'long',
+    year: 'numeric',
+  });
+}
+
+function buildCalendarMonths(calendar, count) {
+  if (!calendar) {
+    return [];
+  }
+
+  const today = new Date();
+  return Array.from({ length: count }, (_, index) => {
+    const monthDate = new Date(today.getFullYear(), today.getMonth() + index, 1);
+    const year = monthDate.getFullYear();
+    const month = monthDate.getMonth();
+    const firstDayOfMonth = new Date(year, month, 1);
+    const lastDayOfMonth = new Date(year, month + 1, 0);
+    const leadingDays = firstDayOfMonth.getDay();
+    const totalCells = Math.ceil((leadingDays + lastDayOfMonth.getDate()) / 7) * 7;
+    const days = [];
+    let availableCount = 0;
+
+    for (let cellIndex = 0; cellIndex < totalCells; cellIndex += 1) {
+      const date = new Date(year, month, cellIndex - leadingDays + 1);
+      const iso = date.toISOString().slice(0, 10);
+      const status = calendar[iso];
+      const inMonth = date.getMonth() === month;
+      const available = inMonth ? status?.available !== false : false;
+      if (inMonth && available) {
+        availableCount += 1;
+      }
+
+      days.push({
+        dayNumber: date.getDate(),
+        inMonth,
+        available,
+      });
+    }
+
+    return {
+      label: monthDate.toLocaleDateString('en-US', {
+        month: 'long',
+        year: 'numeric',
+      }),
+      availableCount,
+      days,
+    };
+  });
 }
 
 export default App;
