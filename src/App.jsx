@@ -15,13 +15,13 @@ const propertyPathMap = {
 
 const propertyMeta = {
   '533203': {
-    bookingUrl: 'https://www.lodgify.com/book/533203',
-    mapQuery: '47 Shasta Trail, Graeagle, CA 96103',
+    bookingUrl: 'https://www.lodgify.com/property/533203/book/',
+    mapEmbedUrl: 'https://maps.google.com/maps?q=47+Shasta+Trail+Graeagle+CA+96103&output=embed',
     mapHeading: '47 Shasta Trail, Graeagle, CA 96103',
   },
   '746614': {
-    bookingUrl: 'https://www.lodgify.com/book/746614',
-    mapQuery: '210 Bitter Brush Way, Placer County, CA 96161',
+    bookingUrl: 'https://www.lodgify.com/property/746614/book/',
+    mapEmbedUrl: 'https://maps.google.com/maps?q=210+Bitter+Brush+Way+Truckee+CA+96161&output=embed',
     mapHeading: '210 Bitter Brush Way, Placer County, CA 96161',
   },
 };
@@ -65,7 +65,7 @@ function mergePropertyData(property) {
     liveAvailability: live.availability || null,
     heroImage: live.heroImage || null,
     bookingUrl: propertyMeta[property.id]?.bookingUrl,
-    mapQuery: propertyMeta[property.id]?.mapQuery || live.address || property.address,
+    mapEmbedUrl: propertyMeta[property.id]?.mapEmbedUrl,
     mapHeading: propertyMeta[property.id]?.mapHeading || property.address,
   };
 }
@@ -125,28 +125,51 @@ function App() {
 }
 
 function SiteShell({ children, properties }) {
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
+
+  const closeMobileNav = () => setMobileNavOpen(false);
+
   return (
     <>
       <header className="sticky top-0 z-40 border-b border-white/10 bg-[rgba(16,18,20,0.72)] backdrop-blur-xl">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-4 sm:px-8">
-          <a href="#/" className="font-heading text-2xl text-[var(--color-paper)]">
-            Pineside Cabins
-          </a>
-          <nav className="hidden items-center gap-6 text-sm uppercase tracking-[0.22em] text-[var(--color-mist)] md:flex">
+        <div className="mx-auto max-w-7xl px-5 py-4 sm:px-8">
+          <div className="flex items-center justify-between gap-4">
+            <a href="#/" className="font-heading text-2xl text-[var(--color-paper)]" onClick={closeMobileNav}>
+              Pineside Cabins
+            </a>
+            <nav className="hidden items-center gap-6 text-sm uppercase tracking-[0.22em] text-[var(--color-mist)] md:flex">
+              {navItems.map((item) => (
+                <a key={item.href} href={item.href} className="transition hover:text-white">
+                  {item.label}
+                </a>
+              ))}
+            </nav>
+            <button
+              type="button"
+              className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/15 text-[var(--color-paper)] transition hover:border-white/30 hover:text-white md:hidden"
+              aria-expanded={mobileNavOpen}
+              aria-controls="mobile-nav-menu"
+              aria-label={mobileNavOpen ? 'Close navigation menu' : 'Open navigation menu'}
+              onClick={() => setMobileNavOpen((open) => !open)}
+            >
+              <span className="sr-only">{mobileNavOpen ? 'Close menu' : 'Open menu'}</span>
+              <span className="flex flex-col gap-1.5">
+                <span className="block h-0.5 w-5 bg-current" />
+                <span className="block h-0.5 w-5 bg-current" />
+                <span className="block h-0.5 w-5 bg-current" />
+              </span>
+            </button>
+          </div>
+          <nav
+            id="mobile-nav-menu"
+            className={`${mobileNavOpen ? 'mt-4 flex' : 'hidden'} flex-col gap-3 rounded-[1.5rem] border border-white/10 bg-black/20 p-4 text-sm uppercase tracking-[0.22em] text-[var(--color-mist)] md:hidden`}
+          >
             {navItems.map((item) => (
-              <a key={item.href} href={item.href} className="transition hover:text-white">
+              <a key={item.href} href={item.href} className="transition hover:text-white" onClick={closeMobileNav}>
                 {item.label}
               </a>
             ))}
           </nav>
-          <a
-            href={properties[1].bookingUrl}
-            className="button-secondary hidden md:inline-flex"
-            target="_blank"
-            rel="noreferrer"
-          >
-            Book Northstar
-          </a>
         </div>
       </header>
       <main>{children}</main>
@@ -343,6 +366,18 @@ function PropertyPage({ property }) {
               <DataRow label="Bathrooms" value={property.bathrooms} />
               <DataRow label="Availability" value={property.availabilitySummary} />
             </dl>
+            {property.mapEmbedUrl && (
+              <div className="mt-6 overflow-hidden rounded-[1.5rem] border border-white/10 bg-white/5">
+                <iframe
+                  title={`${property.name} map`}
+                  src={property.mapEmbedUrl}
+                  className="block h-[300px] w-full border-0"
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                  allowFullScreen
+                />
+              </div>
+            )}
           </div>
         </div>
       </section>
@@ -373,23 +408,6 @@ function PropertyPage({ property }) {
                   </li>
                 ))}
               </ul>
-            </div>
-          </div>
-          <div className="mt-10 rounded-[2rem] border border-dashed border-[var(--color-line)] bg-[linear-gradient(180deg,#f8f5ed,#f0ebdf)] p-7">
-            <p className="eyebrow text-[var(--color-bronze)]">Map</p>
-            <p className="mt-3 font-heading text-3xl text-[var(--color-forest)]">{property.mapHeading}</p>
-            <p className="mt-3 max-w-2xl text-[var(--color-slate)]">
-              Embedded Google Maps view for the property location.
-            </p>
-            <div className="mt-6 overflow-hidden rounded-[1.5rem] border border-[var(--color-line)] bg-white shadow-[0_18px_45px_rgba(17,22,28,0.06)]">
-              <iframe
-                title={`${property.name} map`}
-                src={buildGoogleMapsEmbed(property.mapQuery)}
-                className="h-80 w-full border-0"
-                loading="lazy"
-                referrerPolicy="no-referrer-when-downgrade"
-                allowFullScreen
-              />
             </div>
           </div>
         </div>
@@ -635,10 +653,6 @@ function PhotoGallery({ property }) {
       )}
     </section>
   );
-}
-
-function buildGoogleMapsEmbed(query) {
-  return `https://www.google.com/maps?q=${encodeURIComponent(query)}&z=14&output=embed`;
 }
 
 function BookingWidget({ propertyId }) {
