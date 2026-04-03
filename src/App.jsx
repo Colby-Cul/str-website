@@ -17,12 +17,12 @@ const propertyPathMap = {
 
 const propertyMeta = {
   '533203': {
-    bookingUrl: 'https://www.lodgify.com/property/533203/book/',
+    bookingUrl: 'https://booking.lodgify.com/533203',
     mapEmbedUrl: 'https://maps.google.com/maps?q=47+Shasta+Trail+Graeagle+CA+96103&output=embed',
     mapHeading: '47 Shasta Trail, Graeagle, CA 96103',
   },
   '746614': {
-    bookingUrl: 'https://www.lodgify.com/property/746614/book/',
+    bookingUrl: 'https://booking.lodgify.com/746614',
     mapEmbedUrl: 'https://maps.google.com/maps?q=210+Bitter+Brush+Way+Truckee+CA+96161&output=embed',
     mapHeading: '210 Bitter Brush Way, Placer County, CA 96161',
   },
@@ -347,7 +347,7 @@ function PropertyCard({ property, detailed = false }) {
           <a href={`#/properties/${property.slug}`} className="button-primary">
             View property
           </a>
-          <a href={property.bookingUrl} className="button-secondary" target="_blank" rel="noreferrer">
+          <a href={property.bookingUrl} className="button-secondary" target="_blank" rel="noopener noreferrer">
             Book direct
           </a>
         </div>
@@ -377,7 +377,7 @@ function PropertyPage({ property }) {
             <h1 className="mt-5 font-heading text-[clamp(2.1rem,9vw,4.2rem)] leading-[0.94] sm:text-6xl">{property.name}</h1>
             <p className="mt-5 max-w-2xl text-base text-[var(--color-mist)] sm:text-lg">{property.description}</p>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-              <a href={property.bookingUrl} className="button-primary sm:w-auto" target="_blank" rel="noreferrer">
+              <a href={property.bookingUrl} className="button-primary sm:w-auto" target="_blank" rel="noopener noreferrer">
                 Book {property.shortLocation.includes('Graeagle') ? 'Graeagle' : 'Northstar'}
               </a>
               <div className="flex flex-wrap gap-3">
@@ -466,7 +466,7 @@ function PropertyPage({ property }) {
             <p className="mt-3 text-base text-[var(--color-slate)]">
               Live rates and availability are surfaced directly from Lodgify.
             </p>
-            <a href={property.bookingUrl} className="button-primary mt-5 w-full" target="_blank" rel="noreferrer">
+            <a href={property.bookingUrl} className="button-primary mt-5 w-full" target="_blank" rel="noopener noreferrer">
               Book {property.name}
             </a>
             <div className="mt-5">
@@ -476,7 +476,7 @@ function PropertyPage({ property }) {
         </aside>
       </section>
       <div className="sticky-book-cta md:hidden">
-        <a href={property.bookingUrl} className="button-primary w-full" target="_blank" rel="noreferrer">
+        <a href={property.bookingUrl} className="button-primary w-full" target="_blank" rel="noopener noreferrer">
           Book {property.name}
         </a>
       </div>
