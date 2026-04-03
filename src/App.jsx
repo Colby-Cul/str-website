@@ -163,9 +163,17 @@ function SiteShell({ children, path, properties }) {
               onClick={() => setMenuOpen((open) => !open)}
             >
               <span className="sr-only">{menuOpen ? 'Close menu' : 'Open menu'}</span>
-              <span className="text-3xl leading-none" aria-hidden="true">
-                ≡
-              </span>
+              {menuOpen ? (
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                  <path d="M5 5L15 15M15 5L5 15" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" />
+                </svg>
+              ) : (
+                <span className="flex flex-col gap-[5px]" aria-hidden="true">
+                  <span className="block h-[2px] w-5 bg-current" />
+                  <span className="block h-[2px] w-5 bg-current" />
+                  <span className="block h-[2px] w-5 bg-current" />
+                </span>
+              )}
             </button>
           </div>
           <nav
@@ -231,15 +239,15 @@ function HomePage({ properties }) {
               Two distinct mountain stays, one refined booking experience. Discover a family-ready cabin in Graeagle and an elevated alpine retreat near Northstar.
             </p>
             <div className="mt-10 flex flex-col gap-4 sm:flex-row sm:flex-wrap">
-              <a href={`#/properties/${properties[0].slug}`} className="button-primary sm:w-auto">
+              <a href={`#/properties/${properties[0].slug}`} className="button-primary">
                 Explore Graeagle
               </a>
-              <a href={`#/properties/${properties[1].slug}`} className="button-secondary sm:w-auto">
+              <a href={`#/properties/${properties[1].slug}`} className="button-secondary">
                 Explore Northstar
               </a>
             </div>
           </div>
-          <div className="glass-panel self-end">
+          <div className="glass-panel hidden self-end md:block">
             <p className="eyebrow">Check Availability</p>
             <p className="mt-3 text-base text-[var(--color-mist)]">
               Search both properties from one place, then move directly into live Lodgify availability and pricing.
@@ -368,13 +376,15 @@ function PropertyPage({ property }) {
             <p className="eyebrow">{property.shortLocation}</p>
             <h1 className="mt-5 font-heading text-[clamp(2.1rem,9vw,4.2rem)] leading-[0.94] sm:text-6xl">{property.name}</h1>
             <p className="mt-5 max-w-2xl text-base text-[var(--color-mist)] sm:text-lg">{property.description}</p>
-            <div className="mt-8 flex flex-wrap gap-3">
-              <a href={property.bookingUrl} className="button-primary" target="_blank" rel="noreferrer">
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+              <a href={property.bookingUrl} className="button-primary sm:w-auto" target="_blank" rel="noreferrer">
                 Book {property.shortLocation.includes('Graeagle') ? 'Graeagle' : 'Northstar'}
               </a>
-              <span className="pill">{property.rates.nightlyRange} / night</span>
-              <span className="pill">{property.rating.toFixed(1)} stars</span>
-              <span className="pill">{property.maxGuests} guests</span>
+              <div className="flex flex-wrap gap-3">
+                <span className="pill">{property.rates.nightlyRange} / night</span>
+                <span className="pill">{property.rating.toFixed(1)} stars</span>
+                <span className="pill">{property.maxGuests} guests</span>
+              </div>
             </div>
           </div>
           <div className="glass-panel lg:mt-10">
@@ -410,7 +420,7 @@ function PropertyPage({ property }) {
           <div className="mt-10 grid gap-8 lg:grid-cols-[1fr_0.9fr]">
             <div className="rounded-[2rem] border border-[var(--color-line)] bg-white p-7 shadow-[0_20px_60px_rgba(16,18,20,0.05)]">
               <p className="font-heading text-3xl text-[var(--color-forest)]">Amenities</p>
-              <ul className="mt-5 grid gap-3 text-[var(--color-slate)] sm:grid-cols-2">
+              <ul className="mt-5 grid grid-cols-2 gap-3 text-[var(--color-slate)]">
                 {property.amenities.map((item) => (
                   <li key={item} className="rounded-2xl bg-[var(--color-paper)] px-4 py-3">
                     {item}
@@ -465,7 +475,7 @@ function PropertyPage({ property }) {
           </div>
         </aside>
       </section>
-      <div className="mobile-booking-bar md:hidden">
+      <div className="sticky-book-cta md:hidden">
         <a href={property.bookingUrl} className="button-primary w-full" target="_blank" rel="noreferrer">
           Book {property.name}
         </a>
