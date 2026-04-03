@@ -81,6 +81,8 @@ function mergePropertyData(property) {
     liveAvailability: live.availability || null,
     heroImage: live.heroImage || null,
     bookingUrl: propertyMeta[property.id]?.bookingUrl,
+    airbnbUrl: property.airbnbUrl,
+    vrboUrl: property.vrboUrl,
     mapEmbedUrl: propertyMeta[property.id]?.mapEmbedUrl,
     mapHeading: propertyMeta[property.id]?.mapHeading || property.address,
   };
@@ -492,6 +494,24 @@ function PropertyPage({ property }) {
             <a href={property.bookingUrl} className="button-primary mt-5 w-full" {...bookingLinkProps}>
               Book {property.name}
             </a>
+            <div className="mt-4 grid grid-cols-2 gap-2">
+              <a
+                href={property.airbnbUrl}
+                className="flex items-center justify-center gap-2 rounded-2xl border border-[var(--color-line)] bg-[var(--color-paper)] px-3 py-3 text-sm font-medium text-[var(--color-forest)] transition hover:border-[var(--color-forest)]"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Book on Airbnb
+              </a>
+              <a
+                href={property.vrboUrl}
+                className="flex items-center justify-center gap-2 rounded-2xl border border-[var(--color-line)] bg-[var(--color-paper)] px-3 py-3 text-sm font-medium text-[var(--color-forest)] transition hover:border-[var(--color-forest)]"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Book on VRBO
+              </a>
+            </div>
             <div className="mt-5">
               <BookingWidget propertyId={property.id} />
             </div>
