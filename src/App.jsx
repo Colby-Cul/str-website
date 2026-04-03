@@ -111,7 +111,7 @@ function App() {
 
   return (
     <div className="min-h-screen bg-[var(--color-cream)] text-[var(--color-ink)]">
-      <SiteShell properties={properties}>
+      <SiteShell path={path} properties={properties}>
         {path === '/' && <HomePage properties={properties} />}
         {path === '/properties' && <PropertiesPage properties={properties} />}
         {currentProperty && <PropertyPage property={currentProperty} />}
@@ -124,17 +124,25 @@ function App() {
   );
 }
 
-function SiteShell({ children, properties }) {
+function SiteShell({ children, path, properties }) {
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
   const closeMobileNav = () => setMobileNavOpen(false);
+
+  useEffect(() => {
+    closeMobileNav();
+  }, [path]);
 
   return (
     <>
       <header className="sticky top-0 z-40 border-b border-white/10 bg-[rgba(16,18,20,0.72)] backdrop-blur-xl">
         <div className="mx-auto max-w-7xl px-5 py-4 sm:px-8">
           <div className="flex items-center justify-between gap-4">
-            <a href="#/" className="font-heading text-2xl text-[var(--color-paper)]" onClick={closeMobileNav}>
+            <a
+              href="#/"
+              className="font-heading text-[1.65rem] leading-none text-[var(--color-paper)] sm:text-2xl"
+              onClick={closeMobileNav}
+            >
               Pineside Cabins
             </a>
             <nav className="hidden items-center gap-6 text-sm uppercase tracking-[0.22em] text-[var(--color-mist)] md:flex">
@@ -162,10 +170,15 @@ function SiteShell({ children, properties }) {
           </div>
           <nav
             id="mobile-nav-menu"
-            className={`${mobileNavOpen ? 'mt-4 flex' : 'hidden'} flex-col gap-3 rounded-[1.5rem] border border-white/10 bg-black/20 p-4 text-sm uppercase tracking-[0.22em] text-[var(--color-mist)] md:hidden`}
+            className={`${mobileNavOpen ? 'mt-4 flex' : 'hidden'} mobile-nav-panel flex-col gap-2 text-sm uppercase tracking-[0.22em] text-[var(--color-mist)] md:hidden`}
           >
             {navItems.map((item) => (
-              <a key={item.href} href={item.href} className="transition hover:text-white" onClick={closeMobileNav}>
+              <a
+                key={item.href}
+                href={item.href}
+                className="mobile-nav-link transition hover:text-white"
+                onClick={closeMobileNav}
+              >
                 {item.label}
               </a>
             ))}
