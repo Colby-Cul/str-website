@@ -91,13 +91,18 @@ a {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  position: relative;
+  z-index: 1;
   min-height: 3.25rem;
   border-radius: 999px;
   padding: 0 1.25rem;
+  cursor: pointer;
   font-size: 0.76rem;
   font-weight: 700;
   letter-spacing: 0.22em;
   text-transform: uppercase;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
   transition:
     transform 180ms ease,
     background-color 180ms ease,

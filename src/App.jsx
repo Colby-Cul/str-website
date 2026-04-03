@@ -28,6 +28,18 @@ const propertyMeta = {
   },
 };
 
+const mobileTapLinkStyle = {
+  touchAction: 'manipulation',
+  WebkitTapHighlightColor: 'transparent',
+};
+
+const bookingLinkProps = {
+  target: '_blank',
+  rel: 'noopener noreferrer',
+  'data-lbp-prevent': 'true',
+  style: mobileTapLinkStyle,
+};
+
 function mergePropertyData(property) {
   const live = generatedData.properties?.[property.id];
   if (!live) {
@@ -227,9 +239,9 @@ function HomePage({ properties }) {
   return (
     <>
       <section className="hero-panel relative isolate overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(196,168,106,0.35),transparent_34%),linear-gradient(135deg,rgba(14,16,18,0.92),rgba(26,34,33,0.72),rgba(60,73,79,0.44))]" />
-        <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1800&q=80')] bg-cover bg-center opacity-30" />
-        <div className="relative mx-auto grid min-h-screen max-w-7xl content-center gap-10 px-5 py-24 sm:px-8 lg:min-h-0 lg:grid-cols-[1.2fr_0.8fr] lg:gap-12 lg:py-28">
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(196,168,106,0.35),transparent_34%),linear-gradient(135deg,rgba(14,16,18,0.92),rgba(26,34,33,0.72),rgba(60,73,79,0.44))]" />
+        <div className="pointer-events-none absolute inset-0 bg-[url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1800&q=80')] bg-cover bg-center opacity-30" />
+        <div className="relative z-10 mx-auto grid min-h-screen max-w-7xl content-center gap-10 px-5 py-24 sm:px-8 lg:min-h-0 lg:grid-cols-[1.2fr_0.8fr] lg:gap-12 lg:py-28">
           <div className="max-w-3xl">
             <p className="eyebrow">Luxury Sierra Retreats</p>
             <h1 className="mt-5 max-w-3xl font-heading text-[clamp(2rem,9vw,4.75rem)] leading-[0.92] text-white lg:text-7xl">
@@ -322,8 +334,8 @@ function PropertyCard({ property, detailed = false }) {
         {cardImage ? (
           <img src={cardImage} alt={property.name} className="h-full w-full object-cover" loading="lazy" />
         ) : null}
-        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(11,17,20,0.08),rgba(11,17,20,0.78))]" />
-        <div className="absolute inset-x-4 bottom-4 rounded-[1.5rem] border border-white/12 bg-black/25 p-5 text-white backdrop-blur-[4px] sm:inset-x-6 sm:bottom-6 sm:p-6">
+        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(11,17,20,0.08),rgba(11,17,20,0.78))]" />
+        <div className="absolute inset-x-4 bottom-4 z-10 rounded-[1.5rem] border border-white/12 bg-black/25 p-5 text-white backdrop-blur-[4px] sm:inset-x-6 sm:bottom-6 sm:p-6">
           <div>
             <p className="eyebrow text-[var(--color-accent)]">{property.shortLocation}</p>
             <h2 className="mt-3 font-heading text-[2rem] leading-tight sm:text-4xl">{property.name}</h2>
@@ -347,7 +359,7 @@ function PropertyCard({ property, detailed = false }) {
           <a href={`#/properties/${property.slug}`} className="button-primary">
             View property
           </a>
-          <a href={property.bookingUrl} className="button-secondary" target="_blank" rel="noopener noreferrer">
+          <a href={property.bookingUrl} className="button-secondary" {...bookingLinkProps}>
             Book direct
           </a>
         </div>
@@ -369,15 +381,15 @@ function PropertyPage({ property }) {
   return (
     <>
       <section className="relative isolate overflow-hidden">
-        <div className="absolute inset-0" style={{ background: property.theme }} />
-        <div className="absolute inset-0 bg-[linear-gradient(120deg,rgba(11,17,20,0.84),rgba(11,17,20,0.28))]" />
-        <div className="relative mx-auto grid max-w-7xl gap-8 px-5 py-18 sm:px-8 lg:grid-cols-[1fr_360px] lg:gap-10 lg:py-22">
+        <div className="pointer-events-none absolute inset-0" style={{ background: property.theme }} />
+        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(120deg,rgba(11,17,20,0.84),rgba(11,17,20,0.28))]" />
+        <div className="relative z-10 mx-auto grid max-w-7xl gap-8 px-5 py-18 sm:px-8 lg:grid-cols-[1fr_360px] lg:gap-10 lg:py-22">
           <div className="max-w-3xl text-white">
             <p className="eyebrow">{property.shortLocation}</p>
             <h1 className="mt-5 font-heading text-[clamp(2.1rem,9vw,4.2rem)] leading-[0.94] sm:text-6xl">{property.name}</h1>
             <p className="mt-5 max-w-2xl text-base text-[var(--color-mist)] sm:text-lg">{property.description}</p>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-              <a href={property.bookingUrl} className="button-primary sm:w-auto" target="_blank" rel="noopener noreferrer">
+              <a href={property.bookingUrl} className="button-primary sm:w-auto" {...bookingLinkProps}>
                 Book {property.shortLocation.includes('Graeagle') ? 'Graeagle' : 'Northstar'}
               </a>
               <div className="flex flex-wrap gap-3">
@@ -466,7 +478,7 @@ function PropertyPage({ property }) {
             <p className="mt-3 text-base text-[var(--color-slate)]">
               Live rates and availability are surfaced directly from Lodgify.
             </p>
-            <a href={property.bookingUrl} className="button-primary mt-5 w-full" target="_blank" rel="noopener noreferrer">
+            <a href={property.bookingUrl} className="button-primary mt-5 w-full" {...bookingLinkProps}>
               Book {property.name}
             </a>
             <div className="mt-5">
@@ -476,7 +488,7 @@ function PropertyPage({ property }) {
         </aside>
       </section>
       <div className="sticky-book-cta md:hidden">
-        <a href={property.bookingUrl} className="button-primary w-full" target="_blank" rel="noopener noreferrer">
+        <a href={property.bookingUrl} className="button-primary w-full" {...bookingLinkProps}>
           Book {property.name}
         </a>
       </div>
@@ -762,7 +774,7 @@ function AvailabilityCalendar({ property }) {
           Booked dates are disabled. Selecting a full stay opens Lodgify with your dates pre-filled.
         </div>
         {selection.checkIn && selection.checkOut ? (
-          <a href={bookingUrl} className="button-primary shrink-0" target="_blank" rel="noopener noreferrer">
+          <a href={bookingUrl} className="button-primary shrink-0" {...bookingLinkProps}>
             Book selected stay
           </a>
         ) : null}
